@@ -1,95 +1,64 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
+  Button,
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
+  TextInput,
   View,
-} from 'react-native';
+  VirtualizedList,
+} from "react-native";
+import React, { memo, useCallback, useEffect, useState } from "react";
+import UserCard from "./components/UserCard";
+import { GitData } from "./interfaces";
+// const UserCard = React.lazy(() => import("./components/userCard"));
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+export default function App() {
+  const URL = "https://api.github.com/users";
+  const [username, setUsername] = useState("");
+  const [data, setData] = useState<GitData>({
+    avatar_url: "",
+    login: "",
+    name: "",
+    bio: "",
+    created_at: "",
+    updated_at: "",
+    public_repos: 0,
+    followers: 0,
+    following: 0,
+    public_gists: 0,
+  });
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const fetchData = useCallback((username: string) => {
+    fetch(URL + `/${username}`).then(async (res) => {
+      const json = await res.json();
+      setData(json);
+    });
+    console.log("hello");
+  }, []);
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.container}>
+          <UserCard gitData={data} />
+          <View style={styles.input_container}>
+            <TextInput
+              placeholder="github username"
+              onChangeText={setUsername}
+              style={{ color: "white", flex: 2 }}
+              placeholderTextColor={"grey"}
+              underlineColorAndroid={"cyan"}
+              cursorColor={"orange"}
+            />
+            <Button
+              onPress={() => {
+                fetchData(username.replace(" ", ""));
+                console.log(data);
+              }}
+              title="FETCH"
+              color={"#415a77"}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -97,22 +66,30 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    backgroundColor: "#0d1b2a",
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#0d1b2a",
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  highlight: {
-    fontWeight: '700',
+  input_container: {
+    borderRadius: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    display: "flex",
+    gap: 30,
+    margin: 30,
+    padding: 20,
+    backgroundColor: "#1b263b",
+    // width: "100%",
   },
 });
-
-export default App;
